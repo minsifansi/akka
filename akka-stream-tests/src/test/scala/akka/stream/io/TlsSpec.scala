@@ -158,24 +158,38 @@ class TlsSpec extends StreamSpec(TlsSpec.configOverrides) with WithLogCapturing 
 
     object ClientInitiatesViaTcp extends CommunicationSetup {
       var binding: Tcp.ServerBinding = null
+<<<<<<< HEAD
       def decorateFlow(
           leftClosing: TLSClosing,
           rightClosing: TLSClosing,
           rhs: Flow[SslTlsInbound, SslTlsOutbound, Any]) = {
         binding = server(serverTls(rightClosing).reversed.join(rhs))
         clientTls(leftClosing).join(Tcp().outgoingConnection(binding.localAddress))
+=======
+      def decorateFlow(leftClosing: TLSClosing, rightClosing: TLSClosing,
+                       rhs: Flow[SslTlsInbound, SslTlsOutbound, Any]) = {
+        binding = server(serverTls(rightClosing).reversed join rhs)
+        clientTls(leftClosing) join Tcp().connect(binding.localAddress)
+>>>>>>> Binary compatibility
       }
       override def cleanup(): Unit = binding.unbind()
     }
 
     object ServerInitiatesViaTcp extends CommunicationSetup {
       var binding: Tcp.ServerBinding = null
+<<<<<<< HEAD
       def decorateFlow(
           leftClosing: TLSClosing,
           rightClosing: TLSClosing,
           rhs: Flow[SslTlsInbound, SslTlsOutbound, Any]) = {
         binding = server(clientTls(rightClosing).reversed.join(rhs))
         serverTls(leftClosing).join(Tcp().outgoingConnection(binding.localAddress))
+=======
+      def decorateFlow(leftClosing: TLSClosing, rightClosing: TLSClosing,
+                       rhs: Flow[SslTlsInbound, SslTlsOutbound, Any]) = {
+        binding = server(clientTls(rightClosing).reversed join rhs)
+        serverTls(leftClosing) join Tcp().connect(binding.localAddress)
+>>>>>>> Binary compatibility
       }
       override def cleanup(): Unit = binding.unbind()
     }
@@ -404,10 +418,15 @@ class TlsSpec extends StreamSpec(TlsSpec.configOverrides) with WithLogCapturing 
         .toMat(Sink.head)(Keep.both)
         .run()
 
+<<<<<<< HEAD
       val clientErr = simple
         .join(badClientTls(IgnoreBoth))
         .join(Tcp().outgoingConnection(Await.result(server, 1.second).localAddress))
         .run()
+=======
+      val clientErr = simple.join(badClientTls(IgnoreBoth))
+        .join(Tcp().connect(Await.result(server, 1.second).localAddress)).run()
+>>>>>>> Binary compatibility
 
       Await.result(serverErr, 1.second).getMessage should include("certificate_unknown")
       val clientErrText = Await.result(clientErr, 1.second).getMessage
